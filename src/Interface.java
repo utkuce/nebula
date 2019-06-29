@@ -1,8 +1,8 @@
 import javax.swing.*;
-import javax.swing.plaf.metal.MetalLookAndFeel;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.event.*;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 class Interface {
 
@@ -12,18 +12,12 @@ class Interface {
     Interface(ScreenCapture screenCapture) {
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        //frame.setUndecorated(true);
-
-        display.setBackground(Color.darkGray);
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         display.setPreferredSize(new Dimension(screenSize.width/2, screenSize.height/2));
-
+        display.setBackground(Color.darkGray);
         frame.add(display);
-
         frame.pack();
-        frame.setVisible(true);
 
         frame.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent componentEvent) {
@@ -38,6 +32,11 @@ class Interface {
                 }
             }
         });
+
+        frame.setLocationRelativeTo(null);
+        //frame.setUndecorated(true);
+
+        frame.setVisible(true);
     }
 
     private Rectangle getDisplayArea() {
@@ -65,14 +64,79 @@ class Interface {
 
         private Image image;
 
-        void setImage(Image image) {
-            this.image = image;
+        // selection area
+        private Rectangle selection;
+        private Shape shape = null;
+        Point startDrag, endDrag;
+
+        ImagePanel() {
+
+            addMouseListener(new MouseAdapter() {
+                public void mousePressed(MouseEvent e) {
+                    startDrag = new Point(e.getX(), e.getY());
+                    endDrag = startDrag;
+                    repaint();
+                }
+
+                public void mouseReleased(MouseEvent e) {
+                    if(endDrag!=null && startDrag!=null) {
+                        try {
+                            shape = makeRectangle(startDrag.x, startDrag.y, e.getX(),
+                                    e.getY());
+                            startDrag = null;
+                            endDrag = null;
+                            repaint();
+                        } catch (Exception e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                }
+            });
+
+            addMouseMotionListener(new MouseMotionAdapter() {
+                public void mouseDragged(MouseEvent e) {
+                    endDrag = new Point(e.getX(), e.getY());
+                    repaint();
+                }
+            });
+
         }
 
-        @Override
         protected void paintComponent(Graphics g) {
+
             super.paintComponent(g);
-            g.drawImage(image, 0, 0, null);
+
+            Graphics2D g2 = (Graphics2D) g;
+            g2.drawImage(image, 0, 0, null);
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            g2.setStroke(new BasicStroke(2));
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.50f));
+
+            if (shape != null) {
+
+                g2.setPaint(Color.BLACK);
+                g2.draw(shape);
+                g2.setPaint(Color.YELLOW);
+                g2.fill(shape);
+            }
+
+            if (startDrag != null && endDrag != null) {
+
+                g2.setPaint(Color.LIGHT_GRAY);
+                Shape r = makeRectangle(startDrag.x, startDrag.y, endDrag.x, endDrag.y);
+                g2.draw(r);
+            }
+
+        }
+
+        private Rectangle2D.Float makeRectangle(int x1, int y1, int x2, int y2) {
+            return new Rectangle2D.Float(Math.min(x1, x2), Math.min(y1, y2),
+                    Math.abs(x1 - x2), Math.abs(y1 - y2));
+        }
+
+        void setImage(Image image) {
+            this.image = image;
         }
 
     }
