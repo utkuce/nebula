@@ -18,7 +18,10 @@ class ScreenCapture {
 
     Image capture() {
 
-        capturedImage = robot.createScreenCapture(captureArea);
+        if (captureArea.width > 0 && captureArea.height > 0) {
+            capturedImage = robot.createScreenCapture(captureArea);
+        }
+
         return capturedImage;
     }
 
