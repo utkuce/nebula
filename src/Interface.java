@@ -1,28 +1,46 @@
 import javax.swing.*;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 import java.awt.*;
-import java.awt.image.BufferedImage;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
-class Interface extends JFrame{
+class Interface {
 
     private JFrame frame = new JFrame("JPanel Test");
     private ImagePanel display = new ImagePanel();
 
-    Interface() {
+    Interface(ScreenCapture screenCapture) {
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //frame.setLocationRelativeTo(null);
+        frame.setLocationRelativeTo(null);
         //frame.setUndecorated(true);
 
         display.setBackground(Color.darkGray);
-        display.setPreferredSize(new Dimension(640, 480));
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        display.setPreferredSize(new Dimension(screenSize.width/2, screenSize.height/2));
 
         frame.add(display);
 
         frame.pack();
         frame.setVisible(true);
+
+        frame.addComponentListener(new ComponentAdapter() {
+            public void componentResized(ComponentEvent componentEvent) {
+
+                // get original full resolution image and scale again
+                Image capturedImage = screenCapture.getCapturedImage();
+                if (capturedImage != null) {
+
+                    Rectangle displayArea = getDisplayArea();
+                    display.setSize(displayArea.width, displayArea.height);
+                    setDisplayImage(capturedImage);
+                }
+            }
+        });
     }
 
-    Rectangle getDisplayArea() {
+    private Rectangle getDisplayArea() {
 
         Insets insets = frame.getInsets();
 
@@ -35,17 +53,19 @@ class Interface extends JFrame{
         return new Rectangle(x, y , width, height);
     }
 
-    void setDisplayImage(BufferedImage image) {
+    void setDisplayImage(Image image) {
 
-        display.setImage(image);
+        Rectangle newDims = getDisplayArea();
+        Image scaledImage = image.getScaledInstance(newDims.width, newDims.height, Image.SCALE_SMOOTH);
+        display.setImage(scaledImage);
         display.updateUI();
     }
 
     private class ImagePanel extends JPanel{
 
-        private BufferedImage image;
+        private Image image;
 
-        void setImage(BufferedImage image) {
+        void setImage(Image image) {
             this.image = image;
         }
 
