@@ -14,8 +14,19 @@ public class Main {
         if (screenCapture != null) {
 
             Interface ui = new Interface(screenCapture);
-            Image areaImage = screenCapture.capture();
-            ui.setDisplayImage(areaImage);
+
+            while (! ui.exitButton) {
+
+                Image areaImage = screenCapture.capture();
+                ui.setDisplayImage(areaImage);
+
+                try {
+                    Thread.sleep(16);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
     }
 }

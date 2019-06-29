@@ -11,6 +11,8 @@ class Interface {
 
     private ScreenCapture screenCapture;
 
+    public boolean exitButton = false;
+
     Interface(ScreenCapture screenCapture) {
 
         this.screenCapture = screenCapture;
@@ -34,6 +36,13 @@ class Interface {
                     display.setSize(displayArea.width, displayArea.height);
                     setDisplayImage(capturedImage);
                 }
+            }
+        });
+
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+               exitButton = true;
             }
         });
 
