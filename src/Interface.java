@@ -2,18 +2,22 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 
 class Interface {
 
     private JFrame frame = new JFrame("JPanel Test");
     private ImagePanel display = new ImagePanel();
+    private Dimension screenSize;
+
+    private ScreenCapture screenCapture;
 
     Interface(ScreenCapture screenCapture) {
 
+        this.screenCapture = screenCapture;
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setAlwaysOnTop (true);
 
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         display.setPreferredSize(new Dimension(screenSize.width/2, screenSize.height/2));
         display.setBackground(Color.darkGray);
         frame.add(display);
@@ -22,7 +26,7 @@ class Interface {
         frame.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent componentEvent) {
 
-                // get original full resolution image and scale again
+                // get original full resolution displayedImage and scale again
                 Image capturedImage = screenCapture.getCapturedImage();
                 if (capturedImage != null) {
 
@@ -56,22 +60,22 @@ class Interface {
 
         Rectangle newDims = getDisplayArea();
         Image scaledImage = image.getScaledInstance(newDims.width, newDims.height, Image.SCALE_SMOOTH);
-        display.setImage(scaledImage);
+        display.setDisplayedImage(scaledImage);
         display.updateUI();
     }
 
     private class ImagePanel extends JPanel{
 
-        private Image image;
+        private Image displayedImage;
 
         // selection area
-        private Rectangle selection;
         private Shape shape = null;
         Point startDrag, endDrag;
 
         ImagePanel() {
 
             addMouseListener(new MouseAdapter() {
+
                 public void mousePressed(MouseEvent e) {
                     startDrag = new Point(e.getX(), e.getY());
                     endDrag = startDrag;
@@ -79,21 +83,38 @@ class Interface {
                 }
 
                 public void mouseReleased(MouseEvent e) {
+
                     if(endDrag!=null && startDrag!=null) {
+
                         try {
-                            shape = makeRectangle(startDrag.x, startDrag.y, e.getX(),
-                                    e.getY());
+
+                            shape = makeRectangle(startDrag.x, startDrag.y, e.getX(), e.getY());
+
+                            System.out.println(shape);
+                            Rectangle newCaptureArea = shape.getBounds();
+                            newCaptureArea = scaleSelectionToScreen(newCaptureArea);
+                            screenCapture.setCaptureArea(newCaptureArea);
+                            shape = null; // remove selection box
+
+                            // temp
+                            //Image areaImage = screenCapture.capture();
+                            //setDisplayImage(areaImage);
+
                             startDrag = null;
                             endDrag = null;
+
                             repaint();
+
                         } catch (Exception e1) {
                             e1.printStackTrace();
                         }
                     }
+
                 }
             });
 
             addMouseMotionListener(new MouseMotionAdapter() {
+
                 public void mouseDragged(MouseEvent e) {
                     endDrag = new Point(e.getX(), e.getY());
                     repaint();
@@ -107,7 +128,7 @@ class Interface {
             super.paintComponent(g);
 
             Graphics2D g2 = (Graphics2D) g;
-            g2.drawImage(image, 0, 0, null);
+            g2.drawImage(displayedImage, 0, 0, null);
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             g2.setStroke(new BasicStroke(2));
@@ -135,9 +156,22 @@ class Interface {
                     Math.abs(x1 - x2), Math.abs(y1 - y2));
         }
 
-        void setImage(Image image) {
-            this.image = image;
+        void setDisplayedImage(Image displayedImage) {
+            this.displayedImage = displayedImage;
         }
 
+    }
+
+    private Rectangle scaleSelectionToScreen(Rectangle newCaptureArea) {
+
+        float scaleX = screenSize.width/getDisplayArea().width;
+        float scaleY = screenSize.height/getDisplayArea().height;
+
+        newCaptureArea.x *= scaleX;
+        newCaptureArea.y *= scaleY;
+        newCaptureArea.width *= scaleX;
+        newCaptureArea.height *= scaleY;
+
+        return newCaptureArea;
     }
 }
