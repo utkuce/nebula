@@ -26,7 +26,17 @@ class Interface {
         frame.pack();
 
         JButton button1 = new JButton("Start");
-        button1.addActionListener(e -> textRecognition.active = true);
+
+        button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                textRecognition.active = !textRecognition.active;
+                button1.setText(textRecognition.active ? "Stop" : "Start");
+            }
+        });
+
+
         button1.setMaximumSize(new Dimension(25, 25));
         button1.setBackground(Color.white);
         button1.setAlignmentX(0.0f);
