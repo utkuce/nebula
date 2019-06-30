@@ -98,7 +98,7 @@ class Interface {
     }
 
     void setRecognizedText(String text) {
-        recognizedText.setText("<html>"+ text +"</html>");
+        recognizedText.setText("<html>"+ text.replaceAll("\n", "<br/>") +"</html>");
     }
 
     private Rectangle getDisplayArea() {
