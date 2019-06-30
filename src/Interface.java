@@ -27,21 +27,31 @@ class Interface {
 
         JButton button1 = new JButton("Start");
 
-        button1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        button1.addActionListener(e -> {
 
-                textRecognition.active = !textRecognition.active;
-                button1.setText(textRecognition.active ? "Stop" : "Start");
-            }
+            textRecognition.active = !textRecognition.active;
+            button1.setText(textRecognition.active ? "Stop" : "Start");
         });
-
 
         button1.setMaximumSize(new Dimension(25, 25));
         button1.setBackground(Color.white);
         button1.setAlignmentX(0.0f);
         button1.setAlignmentY(0.0f);
         display.add(button1);
+
+        JButton button2 = new JButton("Reset");
+        button2.addActionListener(e -> {
+
+            textRecognition.active = false;
+            button1.setText("Start");
+            screenCapture.resetCaptureArea();
+        });
+
+        button2.setMaximumSize(new Dimension(25, 25));
+        button2.setBackground(Color.white);
+        button2.setAlignmentX(0.0f);
+        button2.setAlignmentY(0.0f);
+        display.add(button2);
 
         frame.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent componentEvent) {
