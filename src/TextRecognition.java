@@ -14,22 +14,11 @@ class TextRecognition {
 
     TextRecognition() {
 
-        File imageFile = new File("test.png");
         instance = new Tesseract1(); // JNA Direct Mapping
 
         // Maven build bundles English data
         File tessDataFolder = LoadLibs.extractTessResources("tessdata");
         instance.setDatapath(tessDataFolder.getPath());
-
-        try {
-
-            String result = instance.doOCR(imageFile);
-            System.out.println(result);
-
-        } catch (TesseractException e) {
-            System.err.println(e.getMessage());
-        }
-
     }
 
     String recognize(Image image) {
