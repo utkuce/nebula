@@ -10,6 +10,7 @@ import java.io.File;
 class TextRecognition {
 
     private ITesseract instance;
+    boolean active = false;
 
     TextRecognition() {
 

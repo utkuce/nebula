@@ -5,6 +5,8 @@ public class Main {
     public static void main(String[] args) {
 
         ScreenCapture screenCapture = null;
+        TextRecognition textRecognition = new TextRecognition();
+
         try {
             screenCapture = new ScreenCapture();
         } catch (AWTException e) {
@@ -13,16 +15,19 @@ public class Main {
 
         if (screenCapture != null) {
 
-            Interface ui = new Interface(screenCapture);
-            TextRecognition textRecognition = new TextRecognition();
+            Interface ui = new Interface(screenCapture, textRecognition);
 
             while (! ui.exitButton) {
 
                 Image areaImage = screenCapture.capture();
                 ui.setDisplayImage(areaImage);
 
-                String recognizedText = textRecognition.recognize(areaImage);
-                System.out.println(recognizedText);
+                if (textRecognition.active) {
+
+                    String recognizedText = textRecognition.recognize(areaImage);
+                    System.out.println(recognizedText);
+                }
+
 
                 try {
                     Thread.sleep(16);
