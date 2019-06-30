@@ -5,8 +5,11 @@ import java.awt.geom.Rectangle2D;
 
 class Interface {
 
-    private JFrame frame = new JFrame("nebula");
-    private ImagePanel display = new ImagePanel();
+    private JFrame captureWindow = new JFrame("nebula - Screen capture");
+    private JFrame translationWindow = new JFrame("nebula - Translator");
+    private JLabel recognizedText = new JLabel("Recognized text will appear here.");
+
+    private ImagePanel captureDisplay = new ImagePanel();
     private Dimension screenSize;
 
     private ScreenCapture screenCapture;
@@ -16,44 +19,46 @@ class Interface {
     Interface(ScreenCapture screenCapture, TextRecognition textRecognition) {
 
         this.screenCapture = screenCapture;
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setAlwaysOnTop (true);
+
+        // CAPTURE WINDOW
+        captureWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        captureWindow.setAlwaysOnTop (true);
 
         screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        display.setPreferredSize(new Dimension(screenSize.width/2, screenSize.height/2));
-        display.setBackground(Color.darkGray);
-        frame.add(display);
-        frame.pack();
+        captureDisplay.setPreferredSize(new Dimension(screenSize.width/2, screenSize.height/2));
+        captureDisplay.setBackground(Color.darkGray);
+        captureWindow.add(captureDisplay);
+        captureWindow.pack();
 
-        JButton button1 = new JButton("Start");
+        JButton startButton = new JButton("Start");
 
-        button1.addActionListener(e -> {
+        startButton.addActionListener(e -> {
 
             textRecognition.active = !textRecognition.active;
-            button1.setText(textRecognition.active ? "Stop" : "Start");
+            startButton.setText(textRecognition.active ? "Stop" : "Start");
         });
 
-        button1.setMaximumSize(new Dimension(25, 25));
-        button1.setBackground(Color.white);
-        button1.setAlignmentX(0.0f);
-        button1.setAlignmentY(0.0f);
-        display.add(button1);
+        startButton.setMaximumSize(new Dimension(25, 25));
+        startButton.setBackground(Color.white);
+        startButton.setAlignmentX(0.0f);
+        startButton.setAlignmentY(0.0f);
+        captureDisplay.add(startButton);
 
-        JButton button2 = new JButton("Reset");
-        button2.addActionListener(e -> {
+        JButton resetButton = new JButton("Reset");
+        resetButton.addActionListener(e -> {
 
             textRecognition.active = false;
-            button1.setText("Start");
+            startButton.setText("Start");
             screenCapture.resetCaptureArea();
         });
 
-        button2.setMaximumSize(new Dimension(25, 25));
-        button2.setBackground(Color.white);
-        button2.setAlignmentX(0.0f);
-        button2.setAlignmentY(0.0f);
-        display.add(button2);
+        resetButton.setMaximumSize(new Dimension(25, 25));
+        resetButton.setBackground(Color.white);
+        resetButton.setAlignmentX(0.0f);
+        resetButton.setAlignmentY(0.0f);
+        captureDisplay.add(resetButton);
 
-        frame.addComponentListener(new ComponentAdapter() {
+        captureWindow.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent componentEvent) {
 
                 // get original full resolution displayedImage and scale again
@@ -61,34 +66,50 @@ class Interface {
                 if (capturedImage != null) {
 
                     Rectangle displayArea = getDisplayArea();
-                    display.setSize(displayArea.width, displayArea.height);
+                    captureDisplay.setSize(displayArea.width, displayArea.height);
                     setDisplayImage(capturedImage);
                 }
             }
         });
 
-        frame.addWindowListener(new WindowAdapter() {
+        captureWindow.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                exitButton = true;
             }
         });
 
-        frame.setLocationRelativeTo(null);
-        //frame.setUndecorated(true);
+        captureWindow.setLocationRelativeTo(null);
+        captureWindow.setVisible(true);
 
-        frame.setVisible(true);
+        // TRANSLATION WINDOW
+
+        translationWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        translationWindow.setAlwaysOnTop (true);
+        translationWindow.setLocation(captureWindow.getX() + captureWindow.getWidth(), captureWindow.getY());
+
+        recognizedText.setPreferredSize(new Dimension(300, captureDisplay.getHeight()));
+        recognizedText.setHorizontalAlignment(JLabel.LEFT);
+        recognizedText.setVerticalAlignment(JLabel.TOP);
+        translationWindow.add(recognizedText);
+
+        translationWindow.pack();
+        translationWindow.setVisible(true);
+    }
+
+    void setRecognizedText(String text) {
+        recognizedText.setText("<html>"+ text +"</html>");
     }
 
     private Rectangle getDisplayArea() {
 
-        Insets insets = frame.getInsets();
+        Insets insets = captureWindow.getInsets();
 
-        int x = frame.getX() + insets.left;
-        int y = frame.getY() + insets.top;
+        int x = captureWindow.getX() + insets.left;
+        int y = captureWindow.getY() + insets.top;
 
-        int height = frame.getHeight() - insets.top - insets.bottom;
-        int width = frame.getWidth() - insets.left - insets.right;
+        int height = captureWindow.getHeight() - insets.top - insets.bottom;
+        int width = captureWindow.getWidth() - insets.left - insets.right;
 
         return new Rectangle(x, y , width, height);
     }
@@ -97,8 +118,8 @@ class Interface {
 
         Rectangle newDims = getDisplayArea();
         Image scaledImage = image.getScaledInstance(newDims.width, newDims.height, Image.SCALE_SMOOTH);
-        display.setDisplayedImage(scaledImage);
-        display.updateUI();
+        captureDisplay.setDisplayedImage(scaledImage);
+        captureDisplay.updateUI();
     }
 
     private class ImagePanel extends JPanel{
@@ -128,14 +149,10 @@ class Interface {
                             shape = makeRectangle(startDrag.x, startDrag.y, e.getX(), e.getY());
 
                             System.out.println(shape);
-                            Rectangle newCaptureArea = shape.getBounds();
-                            newCaptureArea = scaleSelectionToScreen(newCaptureArea);
+                            Rectangle newCaptureArea = scaleSelectionToScreen(shape.getBounds());
                             screenCapture.setCaptureArea(newCaptureArea);
-                            shape = null; // remove selection box
 
-                            // temp
-                            //Image areaImage = screenCapture.capture();
-                            //setDisplayImage(areaImage);
+                            shape = null; // remove selection box
 
                             startDrag = null;
                             endDrag = null;

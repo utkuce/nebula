@@ -25,6 +25,7 @@ public class Main {
                 if (textRecognition.active) {
 
                     String recognizedText = textRecognition.recognize(areaImage);
+                    ui.setRecognizedText(recognizedText);
                     System.out.println(recognizedText);
                 }
 
