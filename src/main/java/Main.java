@@ -6,6 +6,7 @@ public class Main {
 
         ScreenCapture screenCapture = null;
         TextRecognition textRecognition = new TextRecognition();
+        //Translator translator = new Translator();
 
         try {
             screenCapture = new ScreenCapture();
