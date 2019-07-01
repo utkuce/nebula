@@ -1,5 +1,7 @@
-apply plugin: 'idea'
-apply plugin: 'java'
+plugins {
+    id 'application'
+    id 'java'
+}
 
 repositories {
     mavenCentral()
@@ -9,12 +11,11 @@ dependencies {
 
     // https://mvnrepository.com/artifact/net.sourceforge.tess4j/tess4j
     compile group: 'net.sourceforge.tess4j', name: 'tess4j', version: '4.3.1'
-
-    // https://mvnrepository.com/artifact/net.java.dev.jna/jna
-    compile group: 'net.java.dev.jna', name: 'jna', version: '4.5.0'
 }
 
 jar {
     baseName = 'nebula'
     version =  '0.1.0'
 }
+
+mainClassName = 'Main'
