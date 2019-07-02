@@ -33,13 +33,11 @@ public class Main {
                     if ( !previousText.equals(recognizedText)) {
 
                         String translatedText = translator.translate(recognizedText);
-                        ui.setTranslatedText(translatedText);
+                        ui.setTranslatedText(translatedText.replaceAll("\n", "<br>"));
                     }
-
 
                     previousText = recognizedText;
                 }
-
 
                 try {
                     Thread.sleep(1000);

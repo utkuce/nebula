@@ -1,28 +1,72 @@
-import com.google.cloud.translate.Translate;
-import com.google.cloud.translate.Translate.TranslateOption;
-import com.google.cloud.translate.TranslateOptions;
-import com.google.cloud.translate.Translation;
+import java.io.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
+import com.squareup.okhttp.*;
+import org.json.JSONArray;
 
 
 class Translator {
 
-    private Translate translate;
+    private String subscriptionKey ;
+    private String url = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=en";
+
+    // Instantiates the OkHttpClient.
+    private OkHttpClient client = new OkHttpClient();
 
     Translator() {
 
-        // Instantiates a client
-        translate = TranslateOptions.getDefaultInstance().getService();
+        subscriptionKey = readFile("key.txt");
     }
 
     String translate(String text) {
 
-        Translation translation =
-                translate.translate(
-                        text,
-                        TranslateOption.sourceLanguage("fr"),
-                        TranslateOption.targetLanguage("en"));
+            MediaType mediaType = MediaType.parse("application/json");
+            RequestBody body = RequestBody.create(mediaType,  "[{\n\t\"Text\": \"" + text + "\"\n}]");
+            Request request = new Request.Builder()
+                    .url(url).post(body)
+                    .addHeader("Ocp-Apim-Subscription-Key", subscriptionKey)
+                    .addHeader("Content-type", "application/json").build();
 
 
-        return translation.getTranslatedText();
+        try {
+
+            Response response = client.newCall(request).execute();
+            return getTranslation(response);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private String getTranslation(Response response) throws IOException {
+
+        String responseString = response.body().string();
+        //System.out.println(responseString);
+
+        return new JSONArray(responseString).getJSONObject(0)
+                .getJSONArray("translations").getJSONObject(0)
+                .get("text").toString();
+    }
+
+    private String readFile(String fileName) {
+
+        try {
+
+            File file = new File( getClass().getClassLoader().getResource(fileName).getFile());
+            FileInputStream fis = new FileInputStream(file);
+            byte[] data = new byte[(int) file.length()];
+            fis.read(data);
+            fis.close();
+
+            return new String(data, StandardCharsets.UTF_8);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

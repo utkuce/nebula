@@ -5,6 +5,10 @@ plugins {
 
 repositories {
     mavenCentral()
+
+    maven {
+        url "https://jitpack.io"
+    }
 }
 
 dependencies {
@@ -12,7 +16,8 @@ dependencies {
     // https://mvnrepository.com/artifact/net.sourceforge.tess4j/tess4j
     compile group: 'net.sourceforge.tess4j', name: 'tess4j', version: '4.3.1'
 
-    compile 'com.google.cloud:google-cloud-translate:1.79.0'
+    compile("com.squareup.okhttp:okhttp:2.5.0")
+    compile group: 'org.json', name: 'json', version: '20180813'
 }
 
 jar {
