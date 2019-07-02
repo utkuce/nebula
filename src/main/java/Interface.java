@@ -8,6 +8,7 @@ class Interface {
     private JFrame captureWindow = new JFrame("nebula - Screen capture");
     private JFrame translationWindow = new JFrame("nebula - Translator");
     private JLabel recognizedText = new JLabel("Recognized text will appear here.");
+    private JLabel translatedText = new JLabel("Translated text will appear here.");
 
     private ImagePanel captureDisplay = new ImagePanel();
     private Dimension screenSize;
@@ -84,14 +85,21 @@ class Interface {
 
         // TRANSLATION WINDOW
 
+        translationWindow.setLayout(new GridLayout(2,1));
+
         translationWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         translationWindow.setAlwaysOnTop (true);
         translationWindow.setLocation(captureWindow.getX() + captureWindow.getWidth(), captureWindow.getY());
 
-        recognizedText.setPreferredSize(new Dimension(300, captureDisplay.getHeight()));
+        recognizedText.setPreferredSize(new Dimension(300, captureDisplay.getHeight()/2));
         recognizedText.setHorizontalAlignment(JLabel.LEFT);
         recognizedText.setVerticalAlignment(JLabel.TOP);
         translationWindow.add(recognizedText);
+
+        translatedText.setPreferredSize(new Dimension(300, captureDisplay.getHeight()/2));
+        translatedText.setHorizontalAlignment(JLabel.LEFT);
+        translatedText.setVerticalAlignment(JLabel.TOP);
+        translationWindow.add(translatedText);
 
         translationWindow.pack();
         translationWindow.setVisible(true);
@@ -99,6 +107,10 @@ class Interface {
 
     void setRecognizedText(String text) {
         recognizedText.setText("<html>"+ text.replaceAll("\n", "<br/>") +"</html>");
+    }
+
+    void setTranslatedText(String text) {
+        translatedText.setText("<html>"+ text.replaceAll("\n", "<br/>") +"</html>");
     }
 
     private Rectangle getDisplayArea() {

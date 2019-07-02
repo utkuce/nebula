@@ -6,13 +6,15 @@ public class Main {
 
         ScreenCapture screenCapture = null;
         TextRecognition textRecognition = new TextRecognition();
-        //Translator translator = new Translator();
+        Translator translator = new Translator();
 
         try {
             screenCapture = new ScreenCapture();
         } catch (AWTException e) {
             e.printStackTrace();
         }
+
+        String previousText = "";
 
         if (screenCapture != null) {
 
@@ -27,7 +29,15 @@ public class Main {
 
                     String recognizedText = textRecognition.recognize(areaImage);
                     ui.setRecognizedText(recognizedText);
-                    System.out.println(recognizedText);
+
+                    if ( !previousText.equals(recognizedText)) {
+
+                        String translatedText = translator.translate(recognizedText);
+                        ui.setTranslatedText(translatedText);
+                    }
+
+
+                    previousText = recognizedText;
                 }
 
 
